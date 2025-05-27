@@ -1,0 +1,38 @@
+# tool caches / editor metadata
+.cache/					# clangd, ccache, etc.
+*.swp
+*.swo
+*.tmp
+*.bak
+*.log
+.vscode/
+.idea/
+compile_commands.json
+
+# genereic build productso
+
+# Object & dependency files
+*.o
+*.d
+
+# Linked/packed binaries & images
+*.elf
+*.iso
+*.img
+*.bin
+*.map
+*.lst
+
+
+# Project spesific build directories
+/build/					# top-level ISO build
+/kernel/build/
+/libs/**/build/
+/userland/**/build/
+
+# Init-disk runtime artifacts (only generated output, not sources)
+/initdisk/boot/kernel.elf
+
+# debug artifacts
+.gdb_history
+*.core
