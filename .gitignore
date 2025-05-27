@@ -1,5 +1,5 @@
 # tool caches / editor metadata
-.cache/					# clangd, ccache, etc.
+.cache/
 *.swp
 *.swo
 *.tmp
@@ -25,7 +25,7 @@ compile_commands.json
 
 
 # Project spesific build directories
-/build/					# top-level ISO build
+/build/
 /kernel/build/
 /libs/**/build/
 /userland/**/build/
