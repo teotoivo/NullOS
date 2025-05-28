@@ -1,10 +1,10 @@
-#include "print.h"
-#include "serial_debug.h"
+#include "core/tty.h"
+#include <core/init.h>
 
-void kernel_main()
+void kmain(void)
 {
-    print_clear();
-    print_set_color(PRINT_COLOR_YELLOW, PRINT_COLOR_BLACK);
-    print_str("Welcome to our 64-bit kernel!");
-    serial_write_string("Hello World!\n");
+    kernel_init();
+
+    tty_write_str("Hello World!\n");
+    tty_write_str("Hello From Line 2\n");
 }

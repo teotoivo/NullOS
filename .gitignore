@@ -29,6 +29,10 @@ compile_commands.json
 /kernel/build/
 /libs/**/build/
 /userland/**/build/
+/limine/
+/initdisk/
+/iso_root/
+
 
 # Init-disk runtime artifacts (only generated output, not sources)
 /initdisk/boot/kernel.elf

@@ -7,7 +7,19 @@ DEPS   := $(OBJS:.o=.d)
 TARGET := $(OBJDIR)/kernel.elf
 LINKER_SCRIPT := linker.ld
 
-COMMON_CFLAGS += -Iinclude
+COMMON_CFLAGS += -Iinclude \
+	-ffreestanding \
+    -fno-stack-protector \
+    -fno-stack-check \
+    -fno-PIC \
+    -m64 \
+    -march=x86-64 \
+    -mno-80387 \
+    -mno-mmx \
+    -mno-sse \
+    -mno-sse2 \
+    -mno-red-zone \
+    -mcmodel=kernel
 
 .PHONY: all clean
 
