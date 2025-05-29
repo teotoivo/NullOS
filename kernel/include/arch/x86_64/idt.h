@@ -2,16 +2,14 @@
 
 #include <stdint.h>
 
+/* Total supported vectors */
 #define IDT_ENTRIES 256
 
-struct idtr
+/* IDTR register format */
+typedef struct idtr
 {
     uint16_t limit;
     uint64_t base;
-} __attribute__((packed));
+} __attribute__((packed)) idtr_t;
 
-/* Build the first 32 entries, load the IDTR */
 void idt_init(void);
-
-/* Your C-level dispatcher */
-void interrupt_dispatch(void);
