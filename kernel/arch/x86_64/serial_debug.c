@@ -1,18 +1,7 @@
 #define PORT 0x3f8 // COM1
 
 #include "serial_debug.h"
-
-extern inline unsigned char inb(int portnum)
-{
-    unsigned char data = 0;
-    __asm__ __volatile__("inb %%dx, %%al" : "=a"(data) : "d"(portnum));
-    return data;
-}
-
-extern inline void outb(int portnum, unsigned char data)
-{
-    __asm__ __volatile__("outb %%al, %%dx" ::"a"(data), "d"(portnum));
-}
+#include <arch/x86_64/io.h>
 
 int init_serial()
 {

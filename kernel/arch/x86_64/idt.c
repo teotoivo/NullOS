@@ -1,7 +1,7 @@
-#include <arch/x86_64/gdt.h>
 #include <arch/x86_64/idt.h>
+#include <arch/x86_64/gdt.h>
 
-struct interrupt_descriptor
+typedef struct interrupt_descriptor
 {
     uint16_t offset_low;
     uint16_t selector;
@@ -10,12 +10,12 @@ struct interrupt_descriptor
     uint16_t offset_mid;
     uint32_t offset_high;
     uint32_t reserved;
-} __attribute__((packed));
+} __attribute__((packed)) interrupt_descriptor_t;
 
-static struct interrupt_descriptor idt[IDT_ENTRIES];
-static struct idtr idtr;
+static interrupt_descriptor_t idt[IDT_ENTRIES];
+static idtr_t idtr;
 
-/* Provided by isr.S: address of first stub (vector 0) */
+/* Provided by isr.S: first stub (vector 0) */
 extern char isr_stub_table;
 
 static void set_idt_entry(int vector, void (*handler)(void), uint8_t dpl)
@@ -32,16 +32,17 @@ static void set_idt_entry(int vector, void (*handler)(void), uint8_t dpl)
 
 void idt_init(void)
 {
-    /* Only populate vectors 0–31 for now */
-    for (int i = 0; i < 32; i++)
+    int i;
+
+    /* Populate all 256 entries from our unified stub table */
+    for (i = 0; i < IDT_ENTRIES; i++)
     {
-	/* each stub is 16-bytes apart */
 	void* stub = (void*)((uintptr_t)&isr_stub_table + (i * 16));
 	set_idt_entry(i, stub, 0);
     }
 
     /* Load IDTR */
-    idtr.limit = sizeof(idt) - 1;
+    idtr.limit = (sizeof(idt) - 1);
     idtr.base = (uint64_t)&idt;
     asm volatile("lidt %0" : : "m"(idtr));
 }

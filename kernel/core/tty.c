@@ -45,3 +45,53 @@ void tty_write_str(const char* str)
     while (*str)
 	tty_write_char(*str++);
 }
+
+void tty_write_dec(uint64_t num)
+{
+    /* print unsigned decimal */
+    char buf[20];
+    int i = 0;
+
+    if (num == 0)
+    {
+	tty_write_char('0');
+	return;
+    }
+
+    while (num > 0)
+    {
+	buf[i++] = '0' + (num % 10);
+	num /= 10;
+    }
+
+    /* digits are in reverse order */
+    while (i-- > 0)
+	tty_write_char(buf[i]);
+}
+
+void tty_write_hex(uint64_t num)
+{
+    /* print uppercase hex without 0x prefix */
+    char buf[16];
+    int i = 0;
+    uint64_t tmp = num;
+
+    if (tmp == 0)
+    {
+	tty_write_char('0');
+	return;
+    }
+
+    while (tmp > 0)
+    {
+	uint8_t d = tmp & 0xF;
+	if (d < 10)
+	    buf[i++] = '0' + d;
+	else
+	    buf[i++] = 'A' + (d - 10);
+	tmp >>= 4;
+    }
+
+    while (i-- > 0)
+	tty_write_char(buf[i]);
+}

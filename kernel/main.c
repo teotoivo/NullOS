@@ -6,7 +6,7 @@ void kmain(void)
     tty_write_str("Hello World!\n");
     tty_write_str("Hello From Line 2\n");
 
-    asm volatile("int $11");
+    asm volatile("int $3");
 
     while (1)
     {
