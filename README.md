@@ -3,7 +3,7 @@
 _minimal 64bit hobby OS_
 
 nullos is an OS project built for learning and experimentation.  
-It boots via GRUB2, enters long mode, and runs a small kernel written in C and x86-64 assembly.
+It boots via limine, and runs a small kernel written in C.
 
 The Project is still under heavy devlopment
 
@@ -14,7 +14,6 @@ The Project is still under heavy devlopment
 | `kernel/`   | Kernel sources & per-arch sub-dirs (`arch/x86_64/`)   |
 | `userland/` | User-space programs (future work)                     |
 | `libs/`     | Reusable libraries shared between kernel and userland |
-| `initdisk/` | Pre-built boot disk layout (GRUB config, kernel ELF)  |
 | `build/`    | Top-level build artifacts (ISO images, logs, etc.)    |
 | `Makefile`  | Convenience wrapper driving the full build            |
 | `LICENSE`   | MIT license text (see below)                          |
@@ -27,7 +26,6 @@ The Project is still under heavy devlopment
 | `binutils` cross       | 2.44           |
 | `make`                 | 4.4.1          |
 | `qemu-system-x86_64`   | 10.0.0         |
-| `grub-mkrescue`        | 2.12           |
 
 ## Quick start
 
