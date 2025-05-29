@@ -2,7 +2,7 @@
 #include <drivers/framebuffer.h>
 #include <limine.h>
 #include <stdint.h>
-#include <arch/x86_64/boot.h>
+#include <core/boot.h>
 #include <drivers/fonts/font-9x16.h>
 #define FONT console_font_9x16
 

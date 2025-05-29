@@ -14,15 +14,16 @@ NASMFLAGS      ?= -f elf64 -g
 export COMMON_CFLAGS COMMON_LDFLAGS NASMFLAGS CPU_ARCH
 
 # ───────────────────────── project paths ─────────────────────
-SUBDIRS      := kernel
-kernel_elf   := kernel/build/kernel.elf
-iso_image    := build/nullos.iso
-initdisk_dir := initdisk
+SUBDIRS        := kernel
+build_dir      := build
+initdisk_dir   := $(build_dir)/initdisk
+kernel_elf     := $(build_dir)/kernel.elf
+iso_image      := $(build_dir)/nullos.iso
 
 # ───────────────────────── Limine (3rd-party) ────────────────
-limine_branch ?= v9.x-binary
-limine_dir    := limine
-limine_bin    := $(limine_dir)/limine
+limine_branch  ?= v9.x-binary
+limine_dir     := $(build_dir)/limine
+limine_bin     := $(limine_dir)/limine
 
 # ───────────────────────── run-time helpers ──────────────────
 qemu           ?= qemu-system-x86_64
@@ -44,7 +45,8 @@ $(SUBDIRS):
 
 # ───────────────────────── artefacts ─────────────────────────
 $(kernel_elf): | $(SUBDIRS)
-	$(MAKE) -C kernel			# keeps per-kernel dependency logic local
+	$(MAKE) -C kernel OBJDIR=$(abspath build/kernel) TARGET=$(abspath build/kernel.elf)
+
 
 # ───────────────────────── Limine rules ──────────────────────
 $(limine_dir):
@@ -58,7 +60,7 @@ iso: $(iso_image)
 
 $(iso_image): $(kernel_elf) limine.conf $(limine_bin)
 	@echo "  CP   kernel → initdisk"
-	@mkdir -p $(initdisk_dir)/boot/limine $(initdisk_dir)/EFI/BOOT $(@D)
+	@mkdir -p $(initdisk_dir)/boot/limine $(initdisk_dir)/EFI/BOOT $(dir $@)
 	@cp $(kernel_elf) $(initdisk_dir)/boot/kernel.elf
 	@cp limine.conf $(initdisk_dir)/
 	@cp $(limine_dir)/limine-bios.sys \
@@ -93,6 +95,6 @@ gdb: $(kernel_elf)
 clean:
 	@echo "Cleaning sub-projects…"
 	-$(foreach d,$(SUBDIRS),$(MAKE) -C $(d) clean &&) true
-	@rm -rf build $(limine_dir) $(initdisk_dir) *.dSYM
+	@rm -rf $(build_dir) *.dSYM
 	@echo "done."
 
