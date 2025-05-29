@@ -1,5 +1,5 @@
-OBJDIR := build
-SRCS   := $(shell find . -name '*.c' -o -name '*.asm')
+OBJDIR ?= build
+SRCS   ?= $(shell find . -name '*.c' -o -name '*.asm')
 SRCS   := $(SRCS:./%=%)
 
 OBJS   := $(SRCS:%=$(OBJDIR)/%.o)
