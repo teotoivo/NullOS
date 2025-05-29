@@ -27,3 +27,6 @@ void tty_disable_backend(tty_backend_t backend);
 void tty_write_char(char c);
 void tty_write(const char* str, size_t len);
 void tty_write_str(const char* str);
+
+void tty_write_dec(uint64_t num);
+void tty_write_hex(uint64_t num);
