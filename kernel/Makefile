@@ -1,5 +1,5 @@
 OBJDIR ?= build
-SRCS   ?= $(shell find . -name '*.c' -o -name '*.asm')
+SRCS   ?= $(shell find . -name '*.c' -o -name '*.asm' -o -name '*.S')
 SRCS   := $(SRCS:./%=%)
 
 OBJS   := $(SRCS:%=$(OBJDIR)/%.o)
@@ -39,6 +39,12 @@ $(OBJDIR)/%.asm.o: %.asm
 	@echo "  NASM   $<"
 	@mkdir -p $(@D)
 	$(NASM) $(NASMFLAGS) $< -o $@
+
+
+$(OBJDIR)/%.S.o: %.S
+	@echo "  AS   $<"
+	@mkdir -p $(@D)
+	$(AS) $< -o $@
 
 
 clean:

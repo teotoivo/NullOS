@@ -5,6 +5,7 @@ export CC  := $(CROSS)gcc
 export CXX := $(CROSS)g++
 export LD  := $(CROSS)ld
 export AR  := $(CROSS)ar
+export AS  := $(CROSS)as
 NASM      ?= nasm
 export NASM
 
@@ -44,7 +45,7 @@ $(SUBDIRS):
 	$(if $(filter-out $(skip_delegate),$(MAKECMDGOALS)),$(MAKE) -C $@ $(filter-out $@,$(MAKECMDGOALS)))
 
 # ───────────────────────── artefacts ─────────────────────────
-$(kernel_elf): | $(SUBDIRS)
+$(kernel_elf): $(SUBDIRS)
 	$(MAKE) -C kernel OBJDIR=$(abspath build/kernel) TARGET=$(abspath build/kernel.elf)
 
 
