@@ -1,74 +1,27 @@
-# ───────────────────────── toolchain ─────────────────────────
-CPU_ARCH  ?= x86_64
-CROSS     ?= $(CPU_ARCH)-elf-
-export CC  := $(CROSS)gcc
-export CXX := $(CROSS)g++
-export LD  := $(CROSS)ld
-export AR  := $(CROSS)ar
-export AS  := $(CROSS)as
-NASM      ?= nasm
-export NASM
-
-COMMON_CFLAGS  := -std=gnu17 -ffreestanding -Wall -Wextra -Werror -MMD -MP -g
-COMMON_LDFLAGS :=
-NASMFLAGS      ?= -f elf64 -g
-export COMMON_CFLAGS COMMON_LDFLAGS NASMFLAGS CPU_ARCH
-
-# ───────────────────────── project paths ─────────────────────
-SUBDIRS        := kernel
-build_dir      := build
-initdisk_dir   := $(build_dir)/initdisk
-kernel_elf     := $(build_dir)/kernel.elf
-iso_image      := $(build_dir)/nullos.iso
-
-# ───────────────────────── Limine (3rd-party) ────────────────
-limine_branch  ?= v9.x-binary
-limine_dir     := $(build_dir)/limine
-limine_bin     := $(limine_dir)/limine
-
-# ───────────────────────── run-time helpers ──────────────────
-qemu           ?= qemu-system-x86_64
-qemu_base_opts := -m 512M -serial stdio -no-reboot -no-shutdown
-qemu_opts_run  := -cdrom $(iso_image) $(qemu_base_opts)
-qemu_opts_dbg  := $(qemu_opts_run) -s -S
-
-skip_delegate := run debug gdb
-
-# ───────────────────────── meta targets ──────────────────────
-.PHONY: all iso run debug gdb clean $(SUBDIRS)
-.DEFAULT_GOAL := iso
+.PHONY: all iso clean
 
 all: iso
 
-# Delegate build steps to sub-projects unless explicitly skipped
-$(SUBDIRS):
-	$(if $(filter-out $(skip_delegate),$(MAKECMDGOALS)),$(MAKE) -C $@ $(filter-out $@,$(MAKECMDGOALS)))
-
-# ───────────────────────── artefacts ─────────────────────────
-$(kernel_elf): $(SUBDIRS)
-	$(MAKE) -C kernel OBJDIR=$(abspath build/kernel) TARGET=$(abspath build/kernel.elf)
+include build_scripts/config.mk
+include build_scripts/limine.mk
+include build_scripts/qemu.mk
 
 
-# ───────────────────────── Limine rules ──────────────────────
-$(limine_dir):
-	git clone https://github.com/limine-bootloader/limine.git --branch=$(limine_branch) --depth=1 $@
+$(KERNEL_ELF):
+	$(MAKE) -C kernel BUILD_DIR=$(abspath $(BUILD_DIR))
 
-$(limine_bin): | $(limine_dir)
-	$(MAKE) -C $(limine_dir)
+iso: $(ISO_IMAGE)
 
-# ───────────────────────── ISO (Limine) ──────────────────────
-iso: $(iso_image)
-
-$(iso_image): $(kernel_elf) limine.conf $(limine_bin)
-	@echo "  CP   kernel → initdisk"
-	@mkdir -p $(initdisk_dir)/boot/limine $(initdisk_dir)/EFI/BOOT $(dir $@)
-	@cp $(kernel_elf) $(initdisk_dir)/boot/kernel.elf
-	@cp limine.conf $(initdisk_dir)/
+$(ISO_IMAGE): $(KERNEL_ELF) limine.conf $(limine_bin)
+	@echo "  CP   kernel"
+	@mkdir -p $(BUILD_DIR)/boot/limine $(BUILD_DIR)/EFI/BOOT $(dir $@)
+	@cp $(KERNEL_ELF) $(BUILD_DIR)/boot/kernel.elf
+	@cp limine.conf $(BUILD_DIR)/
 	@cp $(limine_dir)/limine-bios.sys \
 	     $(limine_dir)/limine-bios-cd.bin \
 	     $(limine_dir)/limine-uefi-cd.bin \
-	     $(initdisk_dir)/boot/limine/
-	@cp $(limine_dir)/BOOTX64.EFI $(limine_dir)/BOOTIA32.EFI $(initdisk_dir)/EFI/BOOT/
+	     $(BUILD_DIR)/boot/limine/
+	@cp $(limine_dir)/BOOTX64.EFI $(limine_dir)/BOOTIA32.EFI $(BUILD_DIR)/EFI/BOOT/
 	@echo "  ISO  $@"
 	@xorriso -as mkisofs -R -J \
 	         -b boot/limine/limine-bios-cd.bin \
@@ -76,26 +29,9 @@ $(iso_image): $(kernel_elf) limine.conf $(limine_bin)
 	         -apm-block-size 2048 \
 	         --efi-boot boot/limine/limine-uefi-cd.bin \
 	         -efi-boot-part --efi-boot-image --protective-msdos-label \
-	         $(initdisk_dir) -o $@
+	         $(BUILD_DIR) -o $@
 	@$(limine_bin) bios-install $@
 
-# ───────────────────────── QEMU targets ──────────────────────
-run: iso
-	@echo "Launching QEMU…"
-	$(qemu) $(qemu_opts_run)
 
-debug: iso
-	@echo "Launching QEMU for debugging…"
-	$(qemu) $(qemu_opts_dbg)
-
-gdb: $(kernel_elf)
-	@echo "Starting GDB…"
-	gdb $(kernel_elf) -x .gdbinit
-
-# ───────────────────────── cleanup ───────────────────────────
 clean:
-	@echo "Cleaning sub-projects…"
-	-$(foreach d,$(SUBDIRS),$(MAKE) -C $(d) clean &&) true
-	@rm -rf $(build_dir) *.dSYM
-	@echo "done."
-
+	rm -rf $(BUILD_DIR)

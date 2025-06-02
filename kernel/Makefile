@@ -1,52 +1,49 @@
-OBJDIR ?= build
-SRCS   ?= $(shell find . -name '*.c' -o -name '*.asm' -o -name '*.S')
-SRCS   := $(SRCS:./%=%)
+# Expected external variable: CPU_ARCH (e.g., x86_64)
+ARCH_DIR        = arch/$(CPU_ARCH)
+ARCH_INC        = -I$(ARCH_DIR)/include
 
-OBJS   := $(SRCS:%=$(OBJDIR)/%.o)
-DEPS   := $(OBJS:.o=.d)
-TARGET := $(OBJDIR)/kernel.elf
-LINKER_SCRIPT := linker.ld
+RAW_SRCS        = $(shell find . \( -name '*.c' -o -name '*.asm' \))
+SRCS            = $(RAW_SRCS:./%=%)
 
-COMMON_CFLAGS += -Iinclude \
+OBJS            = $(SRCS:%=$(BUILD_DIR)/%.o)
+DEPS            = $(OBJS:.o=.d)
+TARGET          = $(BUILD_DIR)/kernel.elf
+LINKER_SCRIPT   = linker.ld
+
+KERNEL_CFLAGS = -Iinclude \
+	-mcmodel=kernel \
 	-ffreestanding \
-    -fno-stack-protector \
-    -fno-stack-check \
-    -fno-PIC \
-    -m64 \
-    -march=x86-64 \
-    -mno-80387 \
-    -mno-mmx \
-    -mno-sse \
-    -mno-sse2 \
-    -mno-red-zone \
-    -mcmodel=kernel
+	-nostdlib
 
-.PHONY: all clean
+KERNEL_ASMFLAGS = -f elf64
+
+.PHONY: all always clean
 
 all: $(TARGET)
 
 $(TARGET): $(OBJS) $(LINKER_SCRIPT)
 	@echo "Linking $@"
 	@mkdir -p $(@D)
-	$(LD) $(COMMON_LDFLAGS) -T $(LINKER_SCRIPT) $(OBJS) -o $@
+	$(LD) $(LDFLAGS) -T $(LINKER_SCRIPT) $(OBJS) -o $@
 
-$(OBJDIR)/%.c.o: %.c
+# C compilation: add ARCH_INC if file is in arch/$(CPU_ARCH)/
+$(BUILD_DIR)/%.c.o: %.c
 	@echo "  CC   $<"
 	@mkdir -p $(@D)
-	$(CC) $(COMMON_CFLAGS) -c $< -o $@
+ifeq ($(filter $(ARCH_DIR)/%,$<),$<)
+	$(CC) $(CFLAGS) $(KERNEL_CFLAGS) $(ARCH_INC) -c $< -o $@
+else
+	$(CC) $(CFLAGS) $(KERNEL_CFLAGS) -c $< -o $@
+endif
 
-$(OBJDIR)/%.asm.o: %.asm
+# Assembly compilation
+$(BUILD_DIR)/%.asm.o: %.asm
 	@echo "  NASM   $<"
 	@mkdir -p $(@D)
-	$(NASM) $(NASMFLAGS) $< -o $@
+	$(ASM) $(ASMFLAGS) $(KERNEL_ASMFLAGS) $< -o $@
 
-
-$(OBJDIR)/%.S.o: %.S
-	@echo "  AS   $<"
-	@mkdir -p $(@D)
-	$(AS) $< -o $@
-
+-include $(DEPS)
 
 clean:
-	@rm -rf $(OBJDIR) $(TARGET)
+	rm -rf $(BUILD_DIR)
 
