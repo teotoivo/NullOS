@@ -1,6 +1,6 @@
-#include "arch/x86_64/interrupt.h"
-#include "arch/x86_64/io.h"
-#include "arch/x86_64/pic.h"
+#include "interrupt.h"
+#include "io.h"
+#include "pic.h"
 #include "core/panic.h"
 #include "core/tty.h"
 #include <stdint.h>

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <stdint.h>
-#include <arch/x86_64/idt.h>
+#include <idt.h>
 
 /*
  * CPU state saved by interrupt_stub and the processor.

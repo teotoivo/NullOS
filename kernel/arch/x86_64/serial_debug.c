@@ -1,7 +1,7 @@
 #define PORT 0x3f8 // COM1
 
 #include "serial_debug.h"
-#include <arch/x86_64/io.h>
+#include <io.h>
 
 int init_serial()
 {
