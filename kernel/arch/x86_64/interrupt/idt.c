@@ -1,5 +1,5 @@
-#include <idt.h>
-#include <gdt.h>
+#include <interrupt/idt.h>
+#include <cpu/gdt.h>
 
 typedef struct interrupt_descriptor
 {

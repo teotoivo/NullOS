@@ -1,7 +1,7 @@
 // arch/x86_64/pic.c
 #include <stdint.h>
-#include "io.h"
-#include "pic.h"
+#include "cpu/io.h"
+#include "cpu/pic.h"
 
 void pic_init(void)
 {

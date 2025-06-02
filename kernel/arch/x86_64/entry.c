@@ -1,7 +1,7 @@
-#include "gdt.h"
-#include "interrupt.h"
+#include "cpu/gdt.h"
+#include "interrupt/interrupt.h"
 #include <core/init.h>
-#include <pic.h>
+#include <cpu/pic.h>
 
 void _start(void)
 {

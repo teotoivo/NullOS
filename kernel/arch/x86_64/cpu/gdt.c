@@ -1,12 +1,8 @@
-#include "gdt.h"
+#include "cpu/gdt.h"
 /* Raw 64-bit descriptors */
 static uint64_t gdt_table[GDT_ENTRIES];
 static struct gdtr gdtr;
 
-/*
- * Build a full 64-bit GDT descriptor. All segments are flat in long mode,
- * so limit=0xFFFFF and base=0. We encode flags directly into the 64-bit.
- */
 static uint64_t create_descriptor(uint8_t type, uint8_t dpl, bool long_mode)
 {
     uint64_t desc = 0;
