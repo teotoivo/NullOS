@@ -1,4 +1,5 @@
-#include "arch/x86_64/cpu/gdt.h"
+#include "cpu/gdt.h"
+/* Raw 64-bit descriptors */
 static uint64_t gdt_table[GDT_ENTRIES];
 static struct gdtr gdtr;
 
